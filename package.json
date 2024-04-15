@@ -8,9 +8,11 @@
   "dependencies": {
     "drizzle-orm": "^0.30.8",
     "drizzle-typebox": "^0.1.1",
-    "elysia": "latest"
+    "elysia": "latest",
+    "pg": "^8.11.5"
   },
   "devDependencies": {
+    "@types/pg": "^8.11.5",
     "bun-types": "latest",
     "drizzle-kit": "^0.20.14"
   },
