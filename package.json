@@ -7,9 +7,12 @@
   },
   "dependencies": {
     "@elysiajs/swagger": "^1.0.3",
+    "@lucia-auth/adapter-drizzle": "^1.0.7",
     "drizzle-orm": "^0.30.8",
     "drizzle-typebox": "^0.1.1",
     "elysia": "latest",
+    "lucia": "^3.1.1",
+    "oslo": "^1.2.0",
     "pg": "^8.11.5"
   },
   "devDependencies": {
