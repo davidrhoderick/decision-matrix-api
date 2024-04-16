@@ -31,11 +31,17 @@ const app = new Elysia()
   .derive(luciaMiddleware)
   .post(
     "/signup",
-    async ({ body: { password: rawPassword, username } }) => {
+    async ({ body: { password: rawPassword, username }, set }) => {
       const password = await new Argon2id().hash(rawPassword);
       const id = generateId(15);
 
       await db.insert(userTable).values({ username, id, password });
+
+      const session = await lucia.createSession(id, {});
+
+      set.headers["Set-Cookie"] = lucia
+        .createSessionCookie(session.id)
+        .serialize();
     },
     {
       body: usernameWithPassword,
