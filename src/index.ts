@@ -17,7 +17,7 @@ const app = new Elysia()
   .use(
     cors({
       allowedHeaders: ["cookie", "Set-Cookie", "content-type"],
-      origin: "localhost:5173",
+      origin: process.env.FRONTEND_URL,
       credentials: true,
     })
   )
@@ -48,7 +48,7 @@ const app = new Elysia()
         .serialize();
     },
     {
-      body: 'auth',
+      body: "auth",
     }
   )
   .post(
@@ -79,7 +79,7 @@ const app = new Elysia()
         .serialize();
     },
     {
-      body: 'auth',
+      body: "auth",
     }
   )
   .post("/signout", async ({ set, headers }) => {
