@@ -16,7 +16,7 @@ import { eq } from "drizzle-orm";
 const app = new Elysia()
   .use(
     cors({
-      allowedHeaders: ["cookie", "Set-Cookie", "content-type"],
+      allowedHeaders: ["Authorization", "content-type"],
       origin: process.env.FRONTEND_URL,
       credentials: true,
     })
@@ -43,9 +43,7 @@ const app = new Elysia()
 
       const session = await lucia.createSession(id, {});
 
-      set.headers["Set-Cookie"] = lucia
-        .createSessionCookie(session.id)
-        .serialize();
+      return { tokenType: "Bearer", accessToken: session };
     },
     {
       body: "auth",
@@ -53,7 +51,7 @@ const app = new Elysia()
   )
   .post(
     "/login",
-    async ({ body: { password, username }, set }) => {
+    async ({ body: { password, username } }) => {
       const [existingUser] = await db
         .select()
         .from(userTable)
@@ -74,40 +72,26 @@ const app = new Elysia()
 
       const session = await lucia.createSession(existingUser.id, {});
 
-      set.headers["Set-Cookie"] = lucia
-        .createSessionCookie(session.id)
-        .serialize();
+      return { tokenType: "Bearer", session };
     },
     {
       body: "auth",
     }
   )
-  .post("/signout", async ({ set, headers }) => {
-    const sessionId = lucia.readSessionCookie(headers.cookie ?? "");
+  .post("/signout", async ({ headers: { authorization } }) => {
+    const sessionId = lucia.readBearerToken(authorization ?? "");
     if (sessionId) {
       await lucia.invalidateSession(sessionId);
-
-      set.headers["Set-Cookie"] = lucia.createBlankSessionCookie().serialize();
     }
   })
-  .get("/", async ({ headers, set }) => {
-    const sessionId = lucia.readSessionCookie(headers.cookie ?? "");
+  .get("/", async ({ headers: { authorization } }) => {
+    const sessionId = lucia.readBearerToken(authorization ?? "");
 
     if (!sessionId) {
       return { status: "not logged in" };
     }
 
     const result = await lucia.validateSession(sessionId);
-
-    if (result.session && result.session.fresh) {
-      set.headers["Set-Cookie"] = lucia
-        .createSessionCookie(sessionId)
-        .serialize();
-    }
-
-    if (!result.session) {
-      set.headers["Set-Cookie"] = lucia.createBlankSessionCookie().serialize();
-    }
 
     if (result.session) {
       return { status: "logged in" };
