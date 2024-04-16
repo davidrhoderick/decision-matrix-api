@@ -13,15 +13,6 @@ import luciaMiddleware from "@/lib/middleware";
 
 import { eq } from "drizzle-orm";
 
-const usernameWithPassword = t.Object({
-  username: t.String({
-    minLength: 3,
-    maxLength: 31,
-    pattern: "[a-z0-9_-]+",
-  }),
-  password: t.String({ minLength: 6, maxLength: 255 }),
-});
-
 const app = new Elysia()
   .use(
     cors({
@@ -32,6 +23,16 @@ const app = new Elysia()
   )
   .use(swagger())
   .derive(luciaMiddleware)
+  .model({
+    auth: t.Object({
+      username: t.String({
+        minLength: 3,
+        maxLength: 31,
+        pattern: "[a-z0-9_-]+",
+      }),
+      password: t.String({ minLength: 6, maxLength: 255 }),
+    }),
+  })
   .post(
     "/signup",
     async ({ body: { password: rawPassword, username }, set }) => {
@@ -47,7 +48,7 @@ const app = new Elysia()
         .serialize();
     },
     {
-      body: usernameWithPassword,
+      body: 'auth',
     }
   )
   .post(
@@ -78,7 +79,7 @@ const app = new Elysia()
         .serialize();
     },
     {
-      body: usernameWithPassword,
+      body: 'auth',
     }
   )
   .post("/signout", async ({ set, headers }) => {
