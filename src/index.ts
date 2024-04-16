@@ -1,14 +1,17 @@
 import { Elysia, error, t } from "elysia";
-import { Argon2id } from "oslo/password";
 
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
-import luciaMiddleware from "./lib/middleware";
+
+import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
-import db from "./lib/db";
-import { userTable } from "./lib/users-sessions";
+
+import db from "@/lib/db";
+import { userTable } from "@/lib/users-sessions";
+import lucia from "@/lib/auth";
+import luciaMiddleware from "@/lib/middleware";
+
 import { eq } from "drizzle-orm";
-import lucia from "./lib/auth";
 
 const usernameWithPassword = t.Object({
   username: t.String({
