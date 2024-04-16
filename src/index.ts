@@ -90,7 +90,7 @@ const app = new Elysia()
     const sessionId = lucia.readSessionCookie(headers.cookie ?? "");
 
     if (!sessionId) {
-      return "not logged in";
+      return { status: "not logged in" };
     }
 
     const result = await lucia.validateSession(sessionId);
@@ -106,9 +106,9 @@ const app = new Elysia()
     }
 
     if (result.session) {
-      return "logged in";
+      return { status: "logged in" };
     } else {
-      return "not logged in";
+      return { status: "not logged in" };
     }
   })
   .ws("/edit", {
