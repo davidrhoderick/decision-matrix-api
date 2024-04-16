@@ -35,7 +35,7 @@ const app = new Elysia()
   )
   .post(
     "/login",
-    async ({ body: { password, username }, cookie: { auth_session } }) => {
+    async ({ body: { password, username }, set }) => {
       const [existingUser] = await db
         .select()
         .from(userTable)
@@ -56,47 +56,39 @@ const app = new Elysia()
 
       const session = await lucia.createSession(existingUser.id, {});
 
-      const {
-        value,
-        attributes: { httpOnly, secure, sameSite, path, maxAge },
-      } = lucia.createSessionCookie(session.id);
-
-      auth_session.value = value;
-      auth_session.httpOnly = httpOnly;
-      auth_session.secure = secure;
-      auth_session.sameSite = sameSite;
-      auth_session.path = path;
-      auth_session.maxAge = maxAge;
+      set.headers["Set-Cookie"] = lucia
+        .createSessionCookie(session.id)
+        .serialize();
     },
     {
       body: usernameWithPassword,
     }
   )
-  .get("/", async ({ headers, cookie: { auth_session } }) => {
+  .post("/signout", async ({ set, headers }) => {
+    const sessionId = lucia.readSessionCookie(headers.cookie ?? "");
+    if (sessionId) {
+      await lucia.invalidateSession(sessionId);
+
+      set.headers["Set-Cookie"] = lucia.createBlankSessionCookie().serialize();
+    }
+  })
+  .get("/", async ({ headers, set }) => {
     const sessionId = lucia.readSessionCookie(headers.cookie ?? "");
 
     if (!sessionId) {
-      return "No session";
+      return "not logged in";
     }
 
     const result = await lucia.validateSession(sessionId);
 
     if (result.session && result.session.fresh) {
-      const {
-        value,
-        attributes: { httpOnly, secure, sameSite, path, maxAge },
-      } = lucia.createSessionCookie(sessionId);
-
-      auth_session.value = value;
-      auth_session.httpOnly = httpOnly;
-      auth_session.secure = secure;
-      auth_session.sameSite = sameSite;
-      auth_session.path = path;
-      auth_session.maxAge = maxAge;
+      set.headers["Set-Cookie"] = lucia
+        .createSessionCookie(sessionId)
+        .serialize();
     }
 
     if (!result.session) {
-      auth_session.value = lucia.createBlankSessionCookie().value;
+      set.headers["Set-Cookie"] = lucia.createBlankSessionCookie().serialize();
     }
 
     if (result.session) {
