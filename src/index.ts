@@ -13,6 +13,8 @@ import luciaMiddleware from "@/lib/middleware";
 
 import { eq } from "drizzle-orm";
 
+const tokenType = 'Bearer' as const
+
 const app = new Elysia()
   .use(
     cors({
@@ -43,7 +45,7 @@ const app = new Elysia()
 
       const session = await lucia.createSession(id, {});
 
-      return { tokenType: "Bearer", accessToken: session };
+      return { tokenType, session };
     },
     {
       body: "auth",
@@ -72,7 +74,7 @@ const app = new Elysia()
 
       const session = await lucia.createSession(existingUser.id, {});
 
-      return { tokenType: "Bearer", session };
+      return { tokenType, session };
     },
     {
       body: "auth",
