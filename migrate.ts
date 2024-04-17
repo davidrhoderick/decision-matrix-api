@@ -5,4 +5,5 @@ import db, { client } from "./src/lib/db";
 await migrate(db, { migrationsFolder: "./drizzle" });
 
 // Don't forget to close the connection, otherwise the script will hang
-await client.end();
+// TODO Should be await client.end() but that just hangs
+client.end();
