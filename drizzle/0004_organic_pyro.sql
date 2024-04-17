@@ -1,0 +1,1 @@
+ALTER TABLE "matrix" RENAME COLUMN "user_id" TO "userId";
