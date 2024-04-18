@@ -1,4 +1,4 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
@@ -17,14 +17,6 @@ const app = new Elysia()
   .use(swagger())
   .use(authentication)
   .use(matrices)
-  .ws("/edit", {
-    body: t.Object({
-      message: t.String(),
-    }),
-    message(ws, message) {
-      ws.send({ message, time: Date.now() });
-    },
-  })
   .listen(3000);
 
 console.log(
