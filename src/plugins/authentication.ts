@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 
 const tokenType = "Bearer" as const;
 
-type AuthResponse = { tokenType: string; session: Session };
+type AuthResponse = { tokenType: string; session: Session; username: string };
 
 const authentication = new Elysia()
   .derive(luciaMiddleware)
@@ -30,6 +30,7 @@ const authentication = new Elysia()
         fresh: t.Boolean(),
         expiresAt: t.Date(),
       }),
+      username: t.String(),
     }),
   })
   .post(
@@ -44,7 +45,7 @@ const authentication = new Elysia()
 
       const session = await lucia.createSession(id, {});
 
-      return { tokenType, session };
+      return { tokenType, session, username };
     },
     {
       body: "auth.body",
@@ -74,7 +75,7 @@ const authentication = new Elysia()
 
       const session = await lucia.createSession(existingUser.id, {});
 
-      return { tokenType, session };
+      return { tokenType, session, username };
     },
     {
       body: "auth.body",
