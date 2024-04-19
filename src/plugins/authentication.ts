@@ -50,6 +50,7 @@ const authentication = new Elysia()
     {
       body: "auth.body",
       response: "auth.response",
+      detail: { tags: ["Auth"] },
     }
   )
   .post(
@@ -80,13 +81,18 @@ const authentication = new Elysia()
     {
       body: "auth.body",
       response: "auth.response",
+      detail: { tags: ["Auth"] },
     }
   )
-  .post("/signout", async ({ headers: { authorization } }) => {
-    const sessionId = lucia.readBearerToken(authorization ?? "");
-    if (sessionId) {
-      await lucia.invalidateSession(sessionId);
-    }
-  });
+  .post(
+    "/signout",
+    async ({ headers: { authorization } }) => {
+      const sessionId = lucia.readBearerToken(authorization ?? "");
+      if (sessionId) {
+        await lucia.invalidateSession(sessionId);
+      }
+    },
+    { detail: { tags: ["Auth"] } }
+  );
 
 export default authentication;

@@ -8,7 +8,7 @@ import { and, eq } from "drizzle-orm";
 import validateSession from "@/lib/validate-session";
 import { matrixTable } from "@/lib/matrices";
 
-const matrices = new Elysia()
+const matrix = new Elysia()
   .model({
     matrices: t.Array(
       t.Object({
@@ -47,6 +47,7 @@ const matrices = new Elysia()
               .where(eq(matrixTable.userId, (session as Session).userId)),
           {
             response: "matrices",
+            detail: { tags: ["Matrix"] },
           }
         )
         .get(
@@ -58,6 +59,7 @@ const matrices = new Elysia()
               .where(eq(matrixTable.userId, (session as Session).userId)),
           {
             response: "matrices",
+            detail: { tags: ["Matrix"] },
           }
         )
         .post(
@@ -73,7 +75,7 @@ const matrices = new Elysia()
 
             return matrix;
           },
-          { response: "matrix" }
+          { response: "matrix", detail: { tags: ["Matrix"] } }
         )
         .get(
           "/matrix/:id",
@@ -99,6 +101,7 @@ const matrices = new Elysia()
               200: "matrix",
               400: t.String(),
             },
+            detail: { tags: ["Matrix"] },
           }
         )
         .guard(
@@ -140,6 +143,7 @@ const matrices = new Elysia()
                 {
                   body: "matrix",
                   response: "matrix",
+                  detail: { tags: ["Matrix"] },
                 }
               )
               .delete(
@@ -152,9 +156,12 @@ const matrices = new Elysia()
 
                   return result;
                 },
-                { response: t.Object({ id: t.String() }) }
+                {
+                  response: t.Object({ id: t.String() }),
+                  detail: { tags: ["Matrix"] },
+                }
               )
         )
   );
 
-export default matrices;
+export default matrix;

@@ -4,7 +4,7 @@ import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
 
 import authentication from "@/plugins/authentication";
-import matrices from "@/plugins/matrices";
+import matrix from "@/plugins/matrix";
 
 const app = new Elysia()
   .use(
@@ -14,9 +14,21 @@ const app = new Elysia()
       credentials: true,
     })
   )
-  .use(swagger())
+  .use(
+    swagger({
+      documentation: {
+        tags: [
+          {
+            name: "Auth",
+            description: "Authentication endpoints",
+          },
+          { name: "Matrix", description: "Endpoints for decision matrices" },
+        ],
+      },
+    })
+  )
   .use(authentication)
-  .use(matrices)
+  .use(matrix)
   .listen(3000);
 
 console.log(
