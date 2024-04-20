@@ -62,7 +62,7 @@ const authentication = new Elysia()
         .where(eq(userTable.username, username));
 
       if (!existingUser) {
-        throw error(400, "Invalid username or password");
+        throw error(400, {message: "Invalid username or password"});
       }
 
       const validPassword = await new Argon2id().verify(
@@ -71,7 +71,7 @@ const authentication = new Elysia()
       );
 
       if (!validPassword) {
-        throw error(400, "Invalid username or password");
+        throw error(400, {message: "Invalid username or password"});
       }
 
       const session = await lucia.createSession(existingUser.id, {});
