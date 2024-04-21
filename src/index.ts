@@ -10,7 +10,7 @@ const app = new Elysia()
   .use(
     cors({
       allowedHeaders: ["Authorization", "content-type"],
-      origin: process.env.FRONTEND_URL,
+      origin: process.env.FRONTEND_DOMAIN,
       credentials: true,
     })
   )

@@ -1,2 +1,2 @@
-export * from "./users-sessions";
+export * from "./auth/models";
 export * from "./matrices";

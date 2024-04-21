@@ -1,5 +1,5 @@
 import { json, pgTable, text } from "drizzle-orm/pg-core";
-import { userTable } from "./users-sessions";
+import { userTable } from "./auth/models";
 import { relations } from "drizzle-orm";
 
 export const matrixTable = pgTable("matrix", {

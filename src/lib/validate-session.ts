@@ -1,4 +1,4 @@
-import lucia from "./auth";
+import lucia from "./auth/index";
 
 const validateSession = async (authorization?: string | null) => {
   const sessionId = lucia.readBearerToken(authorization ?? "");
@@ -7,7 +7,13 @@ const validateSession = async (authorization?: string | null) => {
     return { session: false, user: false };
   }
 
-  return lucia.validateSession(sessionId);
+  const session = await lucia.validateSession(sessionId);
+
+  if (!session.user?.emailVerified) {
+    return { session: false, user: false };
+  }
+
+  return session;
 };
 
 export default validateSession;

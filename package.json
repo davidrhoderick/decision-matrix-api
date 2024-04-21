@@ -16,7 +16,8 @@
     "elysia": "latest",
     "lucia": "^3.1.1",
     "oslo": "^1.2.0",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "resend": "^3.2.0"
   },
   "devDependencies": {
     "@types/pg": "^8.11.5",

@@ -2,7 +2,7 @@ import { Context } from "elysia";
 import { verifyRequestOrigin } from "lucia";
 
 import type { User, Session } from "lucia";
-import lucia from "./auth";
+import lucia from "./auth/index";
 
 const luciaMiddleware = async (
   context: Context
