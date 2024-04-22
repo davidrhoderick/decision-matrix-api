@@ -46,7 +46,12 @@ const matrix = new Elysia()
           "/",
           async ({ session }) =>
             db
-              .select({ id: matrixTable.id, name: matrixTable.name })
+              .select({
+                id: matrixTable.id,
+                name: matrixTable.name,
+                createdAt: matrixTable.createdAt,
+                updatedAt: matrixTable.updatedAt,
+              })
               .from(matrixTable)
               .where(eq(matrixTable.userId, (session as Session).userId)),
           {
