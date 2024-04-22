@@ -1,12 +1,13 @@
 import luciaMiddleware from "@/lib/middleware";
 import Elysia, { InternalServerError, error, t } from "elysia";
-import lucia, { emailVertificationTable, userTable } from "@/lib/auth";
+import lucia, { emailVerificationTable, userTable } from "@/lib/auth";
 import { Argon2id } from "oslo/password";
 import { generateId } from "lucia";
 import db from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
+import { isWithinExpirationDate } from "oslo";
 import { Resend } from "resend";
+import emailVerificationToken from "@/lib/auth/email-vertification-token";
 
 const tokenType = "Bearer" as const;
 
@@ -51,41 +52,14 @@ const authentication = new Elysia()
       const password = await new Argon2id().hash(rawPassword);
       const id = generateId(15);
 
-      await db.insert(userTable).values({ username, id, password, email });
+      const [user] = await db
+        .insert(userTable)
+        .values({ username, id, password, email })
+        .returning();
 
-      await db
-        .delete(emailVertificationTable)
-        .where(eq(emailVertificationTable.userId, id));
-      const tokenId = generateId(40);
-      const [{ id: emailVerificationToken }] = await db
-        .insert(emailVertificationTable)
-        .values({
-          id: tokenId,
-          email,
-          userId: id,
-          expiresAt: createDate(new TimeSpan(2, "h")).toString(),
-        })
-        .returning({ id: emailVertificationTable.id });
+      await emailVerificationToken(user);
 
-      try {
-        await resend.emails.send({
-          from: "decision-matrix@afabl.com",
-          to: email,
-          subject: "Confirm your email address",
-          html: `<h1>Confirm your email address</h1>
-          <p>Please confirm your email address by clicking on the link below:</p>
-          
-          <a href="${process.env.BACKEND_URL}/confirm-email/${emailVerificationToken}">${process.env.BACKEND_URL}/confirm-email/${emailVerificationToken}</a>
-          
-          <p>Then you will be able to start using the application</p>
-          
-          <p>~Dave</p>`,
-        });
-        return { success: true };
-      } catch (error) {
-        console.error(error);
-        throw new InternalServerError("Unable to send confirmation email");
-      }
+      return { success: true };
     },
     {
       body: "signup.body",
@@ -98,17 +72,17 @@ const authentication = new Elysia()
       await db.transaction(async (tx) => {
         const [token] = await db
           .select()
-          .from(emailVertificationTable)
-          .where(eq(emailVertificationTable.id, id));
+          .from(emailVerificationTable)
+          .where(eq(emailVerificationTable.id, id));
 
         if (token) {
           await db
-            .delete(emailVertificationTable)
-            .where(eq(emailVertificationTable.id, token.id));
+            .delete(emailVerificationTable)
+            .where(eq(emailVerificationTable.id, token.id));
         }
 
         if (!token || !isWithinExpirationDate(new Date(token.expiresAt))) {
-          throw error(400, { message: "Confirm email token expired" });
+          return (set.redirect = `${process.env.FRONTEND_URL}/email-confirmation-expired`);
         }
 
         const [user] = await db
@@ -167,6 +141,40 @@ const authentication = new Elysia()
     {
       body: "login.body",
       response: "auth.response",
+      detail: { tags: ["Auth"] },
+    }
+  )
+  .post(
+    "/resend-confirmation-email",
+    async ({ body: { password, username }, set }) => {
+      const [existingUser] = await db
+        .select()
+        .from(userTable)
+        .where(eq(userTable.username, username));
+
+      if (!existingUser) {
+        throw error(400, { message: "Invalid username or password" });
+      }
+
+      const validPassword = await new Argon2id().verify(
+        existingUser.password,
+        password
+      );
+
+      if (!validPassword) {
+        throw error(400, { message: "Invalid username or password" });
+      }
+
+      if (existingUser.emailVerified) {
+        throw error(400, { message: "Email already verified" });
+      }
+
+      await emailVerificationToken(existingUser);
+
+      return { success: true };
+    },
+    {
+      body: "login.body",
       detail: { tags: ["Auth"] },
     }
   )

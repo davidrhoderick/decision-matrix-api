@@ -5,7 +5,7 @@ export const userTable = pgTable("user", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: boolean("emailVerified").default(false),
+  emailVerified: boolean("emailVerified").notNull().default(false),
 });
 
 export const sessionTable = pgTable("session", {
@@ -19,7 +19,7 @@ export const sessionTable = pgTable("session", {
   }).notNull(),
 });
 
-export const emailVertificationTable = pgTable("emailVerification", {
+export const emailVerificationTable = pgTable("emailVerification", {
   id: text("id").primaryKey(),
   userId: text("userId")
     .notNull()

@@ -5,7 +5,7 @@ import { Session, generateId } from "lucia";
 import db from "@/lib/db";
 
 import { and, eq } from "drizzle-orm";
-import validateSession from "@/lib/validate-session";
+import validateSession from "@/lib/auth/validate-session";
 import { matrixTable } from "@/lib/matrices";
 
 const matrix = new Elysia()
