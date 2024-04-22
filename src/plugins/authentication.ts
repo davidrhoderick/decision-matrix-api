@@ -156,8 +156,6 @@ const authentication = new Elysia()
         throw error(400, { message: "Invalid username or password" });
       }
 
-      console.log(existingUser);
-
       if (!existingUser.emailVerified) {
         throw error(400, { message: "Email not verified" });
       }

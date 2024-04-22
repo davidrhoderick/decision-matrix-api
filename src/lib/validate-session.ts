@@ -8,7 +8,7 @@ const validateSession = async (authorization?: string | null) => {
   }
 
   const session = await lucia.validateSession(sessionId);
-
+  
   if (!session.user?.emailVerified) {
     return { session: false, user: false };
   }

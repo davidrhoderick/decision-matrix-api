@@ -33,5 +33,5 @@ export interface DatabaseUser {
   username: string;
   password: string;
   email: string;
-  email_verified: boolean;
+  emailVerified: boolean;
 }

@@ -13,7 +13,7 @@ const lucia = new Lucia(adapter, {
   getUserAttributes: (attributes) => {
     return {
       username: attributes.username,
-      emailVerified: attributes.email_verified,
+      emailVerified: attributes.emailVerified,
       email: attributes.email,
     };
   },
@@ -21,7 +21,6 @@ const lucia = new Lucia(adapter, {
 
 export default lucia;
 
-// IMPORTANT!
 declare module "lucia" {
   interface Register {
     Lucia: typeof lucia;
