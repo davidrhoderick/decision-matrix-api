@@ -23,6 +23,8 @@ export const matrixTable = pgTable("matrix", {
       ],
     }),
   userId: text("userId").notNull(),
+  createdAt: text("createdAt").notNull(),
+  updatedAt: text("updatedAt").notNull(),
 });
 
 export const userRelations = relations(userTable, ({ many }) => ({

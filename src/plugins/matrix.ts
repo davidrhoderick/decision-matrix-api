@@ -14,6 +14,8 @@ const matrix = new Elysia()
       t.Object({
         id: t.String(),
         name: t.String(),
+        createdAt: t.String(),
+        updatedAt: t.String(),
       })
     ),
     matrix: t.Object({
@@ -23,6 +25,8 @@ const matrix = new Elysia()
       factors: t.Object({ list: t.Array(t.String()) }),
       factorsChoices: t.Object({ matrix: t.Array(t.Array(t.Number())) }),
       userId: t.String(),
+      createdAt: t.String(),
+      updatedAt: t.String(),
     }),
   })
   .guard(
@@ -54,7 +58,12 @@ const matrix = new Elysia()
           "/",
           async ({ session }) =>
             db
-              .select({ id: matrixTable.id, name: matrixTable.name })
+              .select({
+                id: matrixTable.id,
+                name: matrixTable.name,
+                createdAt: matrixTable.createdAt,
+                updatedAt: matrixTable.updatedAt,
+              })
               .from(matrixTable)
               .where(eq(matrixTable.userId, (session as Session).userId)),
           {
@@ -65,11 +74,14 @@ const matrix = new Elysia()
         .post(
           "/matrix",
           async ({ session }) => {
+            const date = new Date();
             const [matrix] = await db
               .insert(matrixTable)
               .values({
                 id: generateId(15),
                 userId: (session as Session).userId,
+                createdAt: date.toString(),
+                updatedAt: date.toString(),
               })
               .returning();
 
@@ -127,9 +139,10 @@ const matrix = new Elysia()
               .put(
                 "/matrix/:id",
                 async ({ session, body, params: { id } }) => {
+                  const date = new Date();
                   const [matrix] = await db
                     .update(matrixTable)
-                    .set(body)
+                    .set({ ...body, updatedAt: date.toString() })
                     .where(
                       and(
                         eq(matrixTable.userId, (session as Session).userId),
